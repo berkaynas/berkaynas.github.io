@@ -1,5 +1,6 @@
 from openai import OpenAI
 import os
+import shutil
 from git import Repo
 from pathlib import Path
 
@@ -31,6 +32,25 @@ def update_blog(commit_message="Updates Blog"):
 
     with open(PATH_TO_BLOG/"index.html","w") as f:
      f.write(random_text)
+
+
+def create_new_blog(title,content,cover_image):
+    cover_image = Path(cover_image)
+
+    files = len(list(PATH_TO_CONTENT.glob("*.html")))
+    new_title = f"{files+1}.html"
+    path_to_new_content = PATH_TO_CONTENT/new_title
+
+    shutil.copy(cover_image,PATH_TO_CONTENT)
+
+    if not os.path.exists(path_to_new_content):
+        #Write a new HTML File
+        with open(path_to_new_content,"w") as f:
+            f.write('<!DOCTYPE HTML>/n')
+
+    else:
+        raise FileExistsError("File already exists, please check again your name! Aborting!")
+
 
 update_blog()
 #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
