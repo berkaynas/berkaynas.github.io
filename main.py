@@ -30,10 +30,10 @@ def update_blog(commit_message="Updates Blog"):
     origin = repo.remote(name="origin")
     origin.push()
 
-    random_text = "sdg345345sdsdg"
+    #random_text = "sdg345345sdsdg"
 
-    with open(PATH_TO_BLOG/"index.html","w") as f:
-     f.write(random_text)
+    #with open(PATH_TO_BLOG/"index.html","w") as f:
+     #f.write(random_text)
 
 
 def create_new_blog(title,content,cover_image):
