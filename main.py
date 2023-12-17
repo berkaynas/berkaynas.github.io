@@ -1,14 +1,13 @@
-from openai import OpenAI
-import os
-import shutil
 from git import Repo
 from pathlib import Path
 from bs4 import BeautifulSoup as Soup
+from openai import OpenAI
+import os
 
+api_key = os.environ["OPENAI_API_KEY"]
 
-#api_key = os.environ["OPENAI_API_KEY"]
-#print(os.environ)
-#client = OpenAI(api_key=api_key)
+print(os.environ)
+client = OpenAI(api_key=api_key)
 
 PATH_TO_BLOG_REPO = Path("/Users/berkkaynas/PycharmProjects/github/berkaynas.github.io/.git")
 
@@ -96,6 +95,26 @@ def write_to_index(path_to_blog, path_to_new_content):
 
     with open(path_to_blog / "index.html", "w") as f:
         f.write(str(soup.prettify(formatter='html')))
+ #OPENAI UTILS
+def create_prompt(title):
+    prompt = """
+    Biography:
+    My name is Berk and im a producer/DJ.
+    Blog
+    Title: {}
+    tags : music production, DJing, AI, Machine learning, tech, music
+    Summary: I talk about what the future of AI could hold for music production and DJing
+    Full Text: """.format(title)
 
+    return prompt
+title= "The future of Music and AI"
+response = client.completions.create(
+                                    model='text-davinci-003',
+                                    prompt=create_prompt(title),
+                                    max_tokens=1000,
+                                    temperature=0.7)
+
+blog_content = response.choices[0].text
+print(blog_content)
 update_blog()
-#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
+#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
