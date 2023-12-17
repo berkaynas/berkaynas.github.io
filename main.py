@@ -68,7 +68,7 @@ def create_new_blog(title,content,cover_image):
         raise FileExistsError("File already exists, please check again your name! Aborting!")
 
 with open(PATH_TO_BLOG/"index.html") as index:
-    soup = Soup(index.read())
+    soup = Soup(index.read(), features="html.parser")
 
    #Checking duplicate links
 
