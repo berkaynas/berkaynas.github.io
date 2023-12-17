@@ -3,6 +3,8 @@ import os
 import shutil
 from git import Repo
 from pathlib import Path
+from bs4 import BeautifulSoup as Soup
+
 
 #api_key = os.environ["OPENAI_API_KEY"]
 #print(os.environ)
@@ -46,11 +48,54 @@ def create_new_blog(title,content,cover_image):
     if not os.path.exists(path_to_new_content):
         #Write a new HTML File
         with open(path_to_new_content,"w") as f:
-            f.write('<!DOCTYPE HTML>/n')
+            f.write('<!DOCTYPE HTML>\n')
+            f.write("<html>\n")
+            f.write("<head>\n")
+            f.write(f"<title> {title} </title>\n")
+            f.write("<head>\n")
+
+            #OPENAI---> Completion GPT ---> "hello\nblog post\n"
+            f.write("<body>\n")
+            f.write(f"<img src='{cover_image.name}' alt='Cover Image'> <br />\n")
+            f.write(f"<h1> {title} </h1>\n")
+            f.write(content.replace("\n", "<br />\n"))
+            f.write("</body>\n")
+            f.write("</html>\n")
+            print("Blog Created")
+            return path_to_new_content
 
     else:
         raise FileExistsError("File already exists, please check again your name! Aborting!")
 
+with open(PATH_TO_BLOG/"index.html") as index:
+    soup = Soup(index.read())
+
+   #Checking duplicate links
+
+   #Write blog post link ---> index.html
+
+def check_for_duplicate_links(path_to_new_content,links):
+    urls = [str(link.get("href")) for link in links] # [1.html,2.html,3.html]
+    content_path = str(Path(*path_to_new_content.parts[-2:]))
+    return content_path in urls
+
+
+def write_to_index(path_to_blog, path_to_new_content):
+    with open(path_to_blog / "index.html") as index:
+        soup = Soup(index.read())
+
+    links = soup.find_all("a")
+    last_link = links[-1]
+
+    if check_for_duplicate_links(path_to_new_content, links):
+        raise ValueError("Link does already exist!")
+
+    link_to_new_blog = soup.new_tag("a", href=Path(*path_to_new_content.parts[-2:]))
+    link_to_new_blog.string = path_to_new_content.name.split(".")[0]
+    last_link.insert_after(link_to_new_blog)
+
+    with open(path_to_blog / "index.html", "w") as f:
+        f.write(str(soup.prettify(formatter='html')))
 
 update_blog()
 #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
