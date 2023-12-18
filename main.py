@@ -3,6 +3,8 @@ from pathlib import Path
 from bs4 import BeautifulSoup as Soup
 from openai import OpenAI
 import os
+import requests
+import shutil
 
 api_key = os.environ["OPENAI_API_KEY"]
 
@@ -107,14 +109,54 @@ def create_prompt(title):
     Full Text: """.format(title)
 
     return prompt
-title= "The future of Music and AI"
-response = client.completions.create(
+
+def get_blog_from_openai(blog_title):
+    blog_title= "The future of Music and AI"
+    response = client.completions.create(
                                     model='text-davinci-003',
-                                    prompt=create_prompt(title),
+                                    prompt=create_prompt(blog_title),
                                     max_tokens=1000,
                                     temperature=0.7)
+    return response.choices[0].text
 
-blog_content = response.choices[0].text
-print(blog_content)
+
+
+def dalle2_prompt(title):
+    prompt = f"Pixel digital art showing: {title}"
+    return prompt
+    image_prompt = dalle2_prompt(title)
+
+    response =client.images.generate(
+    model="dall-e-3",
+    prompt=image_prompt,
+    size="1024x1024",
+    quality="standart",
+    n=1
+)
+
+
+def save_image(image_url, file_name):
+    image_res = requests.get(image_url, stream=True)
+
+    if image_res.status_code == 200:
+        with open(file_name, 'wb') as f:
+            shutil.copyfileobj(image_res.raw, f)
+    else:
+        print("Error downloading image!")
+    return image_res.status_code, file_name
+
+
+def get_cover_image(title, save_path):
+    response = client.images.create(
+        prompt=dalle2_prompt(title),
+        n=1,
+        size="1024x1024"
+    )
+    image_url = response['data'][0]['url']
+    status_code, file_name = save_image(image_url, save_path)
+    return status_code, file_name
+
+
+
 update_blog()
 #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
